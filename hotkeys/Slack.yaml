@@ -1,5 +1,5 @@
 hotkeys:
   ⌘ .: toggle right pane
-  ⌘ ⇧ D: toggle sidebar
-  ⌘ ⇧ T: go to threads
-  ⌘ ⇧ Y: set a status
+  ⌘ ⇧ d: toggle sidebar
+  ⌘ ⇧ t: go to threads
+  ⌘ ⇧ y: set a status

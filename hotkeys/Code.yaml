@@ -1,7 +1,7 @@
 hotkeys:
-  ⌘ P: fuzzy find
-  ⌘ K, Z: zen mode
-  ⇧ ⌥ F: format doc
-  ⇧ ⌘ X: extensions
-  ⌘ K, ⌘ S: show keyboard shortcuts
+  ⌘ p: fuzzy find
+  ⌘ k, z: zen mode
+  ⇧ ⌥ f: format doc
+  ⇧ ⌘ x: extensions
+  ⌘ k, ⌘ s: show keyboard shortcuts
   ⌘ .: show fixes

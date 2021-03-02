@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ff5c3cc58fa1b858209fc276e133c2850b452fdb92bf7192a17f7467c012cad6"
+            "sha256": "eed792a5236519b72ff869cc7a6298191ded71df6d23e872f6700b1ed08a0152"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,6 +16,13 @@
         ]
     },
     "default": {
+        "applescript": {
+            "hashes": [
+                "sha256:e39542c0411d82c3c860af23f5a54c121279a409e5cf55acfa7f881ea9798854"
+            ],
+            "index": "pypi",
+            "version": "==2021.2.9"
+        },
         "pyobjc": {
             "hashes": [
                 "sha256:1dfce78545df1af25d1dcd710309dd243083d90c977a8c84c483f8254967417b",

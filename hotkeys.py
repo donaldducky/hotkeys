@@ -1,6 +1,8 @@
+import re
 import signal
 import sys
 import yaml
+import applescript
 from time import sleep
 from AppKit import NSWorkspace
 
@@ -15,12 +17,10 @@ def sigint_handler(sig, frame):
     sys.exit(0)
 
 
-def on_app_change(active_app):
-    name = active_app['NSApplicationName']
-    app_path = active_app['NSApplicationPath']
-    print(f"{CLEAR_SCREEN}{TOP_LEFT}Current app → {name} ({app_path})\n")
+def on_context_change(context):
+    print(f"{CLEAR_SCREEN}{TOP_LEFT}Current app → {context['app_name']} ({context['app_path']})\n")
     try:
-        path = f"hotkeys/{name}.yaml"
+        path = f"hotkeys/{context['id']}.yaml"
         with open(path, "r") as stream:
             y = yaml.safe_load(stream)
             hotkeys = y["hotkeys"]
@@ -33,12 +33,30 @@ def on_app_change(active_app):
         print(f"No hotkeys file found at: {path}")
 
 
+def get_context(app):
+    name = app['NSApplicationName']
+    context = name
+    if name == "Google Chrome":
+        result = applescript.tell.app("Google Chrome", "return URL of active tab of front window")
+        if re.match("https://(gist.)?github.com", result.out):
+            context += "-github"
+        else:
+            context += "-unknown"
+
+    return {
+            'id': context,
+            'app_name': name,
+            'app_path': app['NSApplicationPath']
+            }
+
+
 signal.signal(signal.SIGINT, sigint_handler)
 print('%s', HIDE_CURSOR)
-last_active_name = None
+last_active_id = None
 while True:
     active_app = NSWorkspace.sharedWorkspace().activeApplication()
-    if active_app['NSApplicationName'] != last_active_name:
-        last_active_name = active_app['NSApplicationName']
-        on_app_change(active_app)
+    context = get_context(active_app)
+    if context['id'] != last_active_id:
+        last_active_id = context['id']
+        on_context_change(context)
     sleep(1)

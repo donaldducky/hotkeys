@@ -1,0 +1,40 @@
+hotkeys:
+  # Global
+  ⌘ /: focus secondary search
+  g, d: dashboard
+  g, n: notifications
+  g, c: code
+  g, i: issues
+  g, p: pull requests
+  g, a: actions
+  g, b: projects
+  g, w: wiki
+  g, g: discussions
+
+  # Code
+  w: switch branch/tag
+  i: show/hide comments
+  b: blame view
+
+  # PRs
+  c: open list of commits
+  t: open list of changed files
+  ⌘ ⇧ ⏎: add single comment
+  ⌥ left-click: "[show outdated] or [hide outdated]"
+  click, ⇧-click: highlight multiple lines
+
+  # Issues
+  ⌘ ⏎: submit comment
+  ⌘ ⇧ ⏎: submit and close issue
+  ⌘ ⇧ p: preview
+  q: request reviewer
+  c: create issue
+  u: fitler by author
+  a: filter/edit assignees
+  l: filter/edit labels
+  p: filter/edit projects
+  m: filter/edit milestones
+  r: reply (quote selected)
+  ⌘ .: open saved replies
+  "⌘ 1 - ⌘ 9": insert/open saved replies
+

@@ -1,6 +1,6 @@
 hotkeys:
-  ⌘ G: open graph view
-  ⌘ L: open local graph
+  ⌘ g: open graph view
+  ⌘ l: open local graph
   ⌃ ⌘ ←: toggle left sidebar
   ⌃ ⌘ →: toggle right sidebar
-  ⌃ ⇧ M: open templates
+  ⌃ ⇧ m: open templates
