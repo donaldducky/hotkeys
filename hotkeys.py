@@ -12,6 +12,8 @@ CLEAR_SCREEN = '\033[2J'
 TOP_LEFT = '\033[1;1H'
 SHOW_CURSOR = '\033[?25h'
 HIDE_CURSOR = '\033[?25l'
+UNDERLINE_ON = '\033[4m'
+UNDERLINE_OFF = '\033[24m'
 
 
 def sigint_handler(sig, frame):
@@ -28,7 +30,14 @@ def on_context_change(context):
             hotkeys = y["hotkeys"]
             max_key_size = len(max(hotkeys.keys(), key=len))
             for k, v in hotkeys.items():
-                print(f"{k:{max_key_size}}\t{v}")
+                if isinstance(v, dict):
+                    print(f"{UNDERLINE_ON}{k}{UNDERLINE_OFF}")
+                    max_key_size2 = len(max(v.keys(), key=len))
+                    for k2, v2 in v.items():
+                        print(f"{k2:{max_key_size2}}\t{v2}")
+                    print("")
+                else:
+                    print(f"{k:{max_key_size}}\t{v}")
     except yaml.YAMLError as e:
         print(e)
     except FileNotFoundError:
@@ -56,8 +65,11 @@ def get_context(app):
             processes = [p for p in processes if "S+" in p]
             if len(processes) == 1:
                 match = re.match(r'(?P<pid>\d+) (?P<status>[\w+]+) +(?P<cmd>.*)', processes[0])
-                cmd = match['cmd'].split()[0]
-                context = basename(cmd)
+                if match is None:
+                    print(f"Could not parse process string: {processes[0]}")
+                else:
+                    cmd = match['cmd'].split()[0]
+                    context = basename(cmd)
 
     return {
             'id': context,
@@ -67,7 +79,7 @@ def get_context(app):
 
 
 signal.signal(signal.SIGINT, sigint_handler)
-print('%s', HIDE_CURSOR)
+print(f'{HIDE_CURSOR}')
 last_active_id = None
 while True:
     active_app = NSWorkspace.sharedWorkspace().activeApplication()

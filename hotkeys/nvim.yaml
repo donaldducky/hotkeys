@@ -1,7 +1,84 @@
 hotkeys:
-  g f: edit file under cursor
-  g x: open file under cursor
-  g i: go to last insertion point in insert mode
-  g v: start VISUAL and use last selection
-  g n: select match of last search
-  g I: insert text at beginning of line
+  global:
+    gf: edit file under cursor
+    gx: open file under cursor
+    gi: go to last insertion point in insert mode
+    gv: start VISUAL and use last selection
+    gn: select match of last search
+    gI: insert text at beginning of line
+
+  ranges:
+    <number>: line number
+    .: current line
+    $: last line
+    "%": entire file
+    "*": last selection
+    "'<": first visual line selected
+    "'>": last visual line selected
+    ":.,.+10d": delete current line plus next 10 lines
+
+  commands:
+    ⌃a: increment number
+    ⌃x: decrement number
+    g,⌃a: increment number on selected lines by 1..n
+    g,⌃x: decrement number on selected lines by 1..n
+    :g/useless/norm gu$: lowercase every line containing "useless"
+    :norm: uses keymappings
+    :nomr!: does not use keymappings
+
+# motions:
+#   w or W: word / WORD
+#   e or E: end of word / WORD
+#   b or B: word / WORD backwards
+#   ge or gE: end of word / WORD backwards
+#   ( or ): sentence backwards / forwards
+#   "{ or }": paragraphs backwards / forwards
+#   "[[ or ]]": sections backwards / forwards
+
+  text objects:
+    aw / aW / iw / iW: a word / WORD, inner word / WORD
+    as / is: a sentence, inner sentence
+    ap / ip: a paragraph, inner paragraph
+    a] / a[ / i] / i[: a/inner [] block
+    a) / a( / ab / i) / i( / ib: a/inner () block
+    a> / a< / i> / i<: a/inner <> block
+    at / it: a tag block
+    a} / a{ / aB / i} / i{ / iB: a/inner {} block
+    a" / a' / a` / i" / i' / i`: around/in quotes
+
+# # how to jump blocks in elixir? what is the text object? (ie. if do end)
+# jump motions:
+#   ⌃o / ⌃i: jumplist older / newer position
+#   g; / g,: changelist
+#   "[m / ]m": prev / next methods
+
+# quickfix (global) / location list (local):
+#   :cl / :ll: display entries
+#   :cc <n> / :lc <n>: move to <n> entry in the list
+#   :cn / :ln / :cp / :lp: next, prev
+#   :cfir / :lfir / :clas / :llas: first, last
+#   :copen / :lopen: open list
+#   :cdo <cmd> / :ldo <cmd>: execute command on each item
+#   :cex <expr> / :lex <expr>: create list using <expr>
+#   :cadde <expr> / :ladde <expr>: append to list
+
+# marks:
+#   m[a-z]: buffer local mark
+#   m[A-Z]: global mark
+#   "'<mark>": move to a mark
+#   "g'<mark>": move to mark without changing jumplist
+#   "'": last mark
+#   :marks / :marks <mark>: display marks
+#   :delm: delete marks
+#   :delm!: delete all marks except A-Z, 0-9 and clears changelist
+#   :h shada: shared data to persist settings across sessions
+
+# sort:
+#   :sort i: ignore case
+#   :sort n: first decimal on line
+#   :sort f: first float on line
+#   /pattern/: sort what comes after match
+#   /pattern/ r: sort using the matching pattern
+
+# settings:
+#   :set clipboard=unnamedplus: use system clipboard
