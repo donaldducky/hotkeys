@@ -1,8 +1,10 @@
 import re
 import signal
+import subprocess
 import sys
 import yaml
 import applescript
+from os.path import basename
 from time import sleep
 from AppKit import NSWorkspace
 
@@ -18,7 +20,7 @@ def sigint_handler(sig, frame):
 
 
 def on_context_change(context):
-    print(f"{CLEAR_SCREEN}{TOP_LEFT}Current app → {context['app_name']} ({context['app_path']})\n")
+    print(f"{CLEAR_SCREEN}{TOP_LEFT}{context['id']} ({context['app_path']})\n")
     try:
         path = f"hotkeys/{context['id']}.yaml"
         with open(path, "r") as stream:
@@ -42,6 +44,20 @@ def get_context(app):
             context += "-github"
         else:
             context += "-unknown"
+    elif name == "iTerm2":
+        result = applescript.tell.app("iTerm2", "return tty of current session of current tab of front window")
+        tty = basename(result.out)
+        cmd = ["ps", "-t", tty, "-opid=,stat=,command="]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        out, err = proc.communicate()
+        context = "🤷🏻‍♂️"
+        if proc.returncode == 0:
+            processes = out.split("\n")
+            processes = [p for p in processes if "S+" in p]
+            if len(processes) == 1:
+                match = re.match(r'(?P<pid>\d+) (?P<status>[\w+]+) +(?P<cmd>.*)', processes[0])
+                cmd = match['cmd'].split()[0]
+                context = basename(cmd)
 
     return {
             'id': context,

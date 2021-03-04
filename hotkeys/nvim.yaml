@@ -1,0 +1,7 @@
+hotkeys:
+  g f: edit file under cursor
+  g x: open file under cursor
+  g i: go to last insertion point in insert mode
+  g v: start VISUAL and use last selection
+  g n: select match of last search
+  g I: insert text at beginning of line
