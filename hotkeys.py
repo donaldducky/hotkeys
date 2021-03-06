@@ -68,8 +68,11 @@ def get_context(app):
                 if match is None:
                     print(f"Could not parse process string: {processes[0]}")
                 else:
-                    cmd = match['cmd'].split()[0]
-                    context = basename(cmd)
+                    if re.search(r'python hotkeys.py', match['cmd']) is not None:
+                        context = 'hotkeys'
+                    else:
+                        cmd = match['cmd'].split()[0]
+                        context = basename(cmd)
 
     return {
             'id': context,
@@ -84,7 +87,7 @@ last_active_id = None
 while True:
     active_app = NSWorkspace.sharedWorkspace().activeApplication()
     context = get_context(active_app)
-    if context['id'] != last_active_id:
+    if context['id'] != 'hotkeys' and context['id'] != last_active_id:
         last_active_id = context['id']
         on_context_change(context)
     sleep(1)
