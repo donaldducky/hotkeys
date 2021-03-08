@@ -62,9 +62,11 @@ def get_context(app):
         context = "🤷🏻‍♂️"
         if proc.returncode == 0:
             processes = out.split("\n")
-            processes = [p for p in processes if "S+" in p]
+            # S+ or R+
+            # TODO parse the process line, then check for the flag
+            processes = [p for p in processes if "+" in p]
             if len(processes) == 1:
-                match = re.match(r'(?P<pid>\d+) (?P<status>[\w+]+) +(?P<cmd>.*)', processes[0])
+                match = re.search(r'(?P<pid>\d+)\s+(?P<status>[\w+]+)\s+(?P<cmd>.*)', processes[0])
                 if match is None:
                     print(f"Could not parse process string: {processes[0]}")
                 else:
