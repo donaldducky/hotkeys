@@ -22,7 +22,7 @@ def sigint_handler(sig, frame):
 
 
 def on_context_change(context):
-    print(f"{CLEAR_SCREEN}{TOP_LEFT}{context['id']} ({context['app_path']})\n")
+    print(f"{CLEAR_SCREEN}{TOP_LEFT}{context['id']} ({context['app_path']}) {context['cwd']}\n")
     try:
         path = f"hotkeys/{context['id']}.yaml"
         with open(path, "r") as stream:
@@ -47,6 +47,7 @@ def on_context_change(context):
 def get_context(app):
     name = app['NSApplicationName']
     context = name
+    cwd = ''
     if name == "Google Chrome":
         result = applescript.tell.app("Google Chrome", "return URL of active tab of front window")
         if re.match("https://(gist.)?github.com", result.out):
@@ -73,23 +74,35 @@ def get_context(app):
                     if re.search(r'python hotkeys.py', match['cmd']) is not None:
                         context = 'hotkeys'
                     else:
+                        lsof_cmd = ["lsof", "-a", "-p", match['pid'], "-d", "cwd", "-F", "n"]
+                        proc = subprocess.Popen(lsof_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                        out, err = proc.communicate()
+                        try:
+                            cwd = [c for c in out.split("\n") if re.match(r'^n', c)][0][1:]
+                        except IndexError:
+                            print(f"Could not find cwd from {out}")
+
                         cmd = match['cmd'].split()[0]
                         context = basename(cmd)
 
     return {
             'id': context,
             'app_name': name,
-            'app_path': app['NSApplicationPath']
+            'app_path': app['NSApplicationPath'],
+            'cwd': cwd
             }
 
 
 signal.signal(signal.SIGINT, sigint_handler)
 print(f'{HIDE_CURSOR}')
+# TODO better handle context change
 last_active_id = None
+last_cwd = ''
 while True:
     active_app = NSWorkspace.sharedWorkspace().activeApplication()
     context = get_context(active_app)
-    if context['id'] != 'hotkeys' and context['id'] != last_active_id:
+    if context['id'] != 'hotkeys' and (context['id'] != last_active_id or context['cwd'] != last_cwd):
         last_active_id = context['id']
+        last_cwd = context['cwd']
         on_context_change(context)
     sleep(1)
