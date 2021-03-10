@@ -17,7 +17,7 @@ UNDERLINE_OFF = '\033[24m'
 
 
 def sigint_handler(sig, frame):
-    print('%s' % SHOW_CURSOR)
+    print(f'{SHOW_CURSOR}')
     sys.exit(0)
 
 
