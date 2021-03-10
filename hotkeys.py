@@ -97,17 +97,20 @@ def get_context(app):
             'cwd': cwd
             }
 
+def main_loop():
+    signal.signal(signal.SIGINT, sigint_handler)
+    print(f'{HIDE_CURSOR}')
+    # TODO better handle context change
+    last_active_id = None
+    last_cwd = ''
+    while True:
+        active_app = NSWorkspace.sharedWorkspace().activeApplication()
+        context = get_context(active_app)
+        if context['id'] != 'hotkeys' and (context['id'] != last_active_id or context['cwd'] != last_cwd):
+            last_active_id = context['id']
+            last_cwd = context['cwd']
+            on_context_change(context)
+        sleep(1)
 
-signal.signal(signal.SIGINT, sigint_handler)
-print(f'{HIDE_CURSOR}')
-# TODO better handle context change
-last_active_id = None
-last_cwd = ''
-while True:
-    active_app = NSWorkspace.sharedWorkspace().activeApplication()
-    context = get_context(active_app)
-    if context['id'] != 'hotkeys' and (context['id'] != last_active_id or context['cwd'] != last_cwd):
-        last_active_id = context['id']
-        last_cwd = context['cwd']
-        on_context_change(context)
-    sleep(1)
+
+main_loop()
