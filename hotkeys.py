@@ -1,5 +1,4 @@
 import re
-import signal
 import subprocess
 import sys
 import yaml
@@ -14,11 +13,6 @@ SHOW_CURSOR = '\033[?25h'
 HIDE_CURSOR = '\033[?25l'
 UNDERLINE_ON = '\033[4m'
 UNDERLINE_OFF = '\033[24m'
-
-
-def sigint_handler(sig, frame):
-    print(f'{SHOW_CURSOR}')
-    sys.exit(0)
 
 
 def on_context_change(context):
@@ -98,19 +92,22 @@ def get_context(app):
             }
 
 def main_loop():
-    signal.signal(signal.SIGINT, sigint_handler)
     print(f'{HIDE_CURSOR}')
     # TODO better handle context change
     last_active_id = None
     last_cwd = ''
     while True:
-        active_app = NSWorkspace.sharedWorkspace().activeApplication()
-        context = get_context(active_app)
-        if context['id'] != 'hotkeys' and (context['id'] != last_active_id or context['cwd'] != last_cwd):
-            last_active_id = context['id']
-            last_cwd = context['cwd']
-            on_context_change(context)
-        sleep(1)
+        try:
+            active_app = NSWorkspace.sharedWorkspace().activeApplication()
+            context = get_context(active_app)
+            if context['id'] != 'hotkeys' and (context['id'] != last_active_id or context['cwd'] != last_cwd):
+                last_active_id = context['id']
+                last_cwd = context['cwd']
+                on_context_change(context)
+            sleep(1)
+        except KeyboardInterrupt:
+            print(f'{SHOW_CURSOR}')
+            sys.exit(0)
 
 
 main_loop()
