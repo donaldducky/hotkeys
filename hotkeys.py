@@ -52,37 +52,34 @@ def get_context(app):
         result = applescript.tell.app("iTerm2", "return tty of current session of current tab of front window")
         tty = basename(result.out)
         cmd = ["ps", "-t", tty, "-opid=,stat=,command="]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        out, err = proc.communicate()
+        out = subprocess.run(cmd, capture_output=True, universal_newlines=True, check=True).stdout
         context = "🤷🏻‍♂️"
-        if proc.returncode == 0:
-            process_lines = out.split("\n")
-            # S+ or R+
-            # TODO parse the process line, then check for the flag
-            processes = [p for p in process_lines if "S+" in p]
-            if len(processes) == 0:
-                processes = [p for p in process_lines if "R+" in p]
+        process_lines = out.split("\n")
+        # S+ or R+
+        # TODO parse the process line, then check for the flag
+        processes = [p for p in process_lines if "S+" in p]
+        if not processes:
+            processes = [p for p in process_lines if "R+" in p]
 
-            if len(processes) == 1:
-                match = re.search(r'(?P<pid>\d+)\s+(?P<status>[\w+]+)\s+(?P<cmd>.*)', processes[0])
-                if match is None:
-                    print(f"Could not parse process string: {processes[0]}")
-                else:
-                    if re.search(r'python hotkeys.py', match['cmd']) is not None:
-                        context = 'hotkeys'
-                    else:
-                        lsof_cmd = ["lsof", "-a", "-p", match['pid'], "-d", "cwd", "-F", "n"]
-                        proc = subprocess.Popen(lsof_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                        out, err = proc.communicate()
-                        try:
-                            cwd = [c for c in out.split("\n") if re.match(r'^n', c)][0][1:]
-                        except IndexError:
-                            print(f"Could not find cwd from {out}")
-
-                        cmd = match['cmd'].split()[0]
-                        context = basename(cmd)
+        if len(processes) == 1:
+            match = re.search(r'(?P<pid>\d+)\s+(?P<status>[\w+]+)\s+(?P<cmd>.*)', processes[0])
+            if match is None:
+                print(f"Could not parse process string: {processes[0]}")
             else:
-                print(f"Found an unexpected number of processes {processes}")
+                if re.search(r'python hotkeys.py', match['cmd']) is not None:
+                    context = 'hotkeys'
+                else:
+                    lsof_cmd = ["lsof", "-a", "-p", match['pid'], "-d", "cwd", "-F", "n"]
+                    out = subprocess.run(lsof_cmd, capture_output=True, universal_newlines=True, check=True).stdout
+                    try:
+                        cwd = [c for c in out.split("\n") if c.startswith("n")][0][1:]
+                    except IndexError:
+                        print(f"Could not find cwd from {out}")
+
+                    cmd = match['cmd'].split()[0]
+                    context = basename(cmd)
+        else:
+            print(f"Found an unexpected number of processes {processes}")
 
     return {
             'id': context,
