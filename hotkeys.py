@@ -1,5 +1,4 @@
 import re
-import signal
 import subprocess
 import sys
 import yaml
@@ -14,11 +13,6 @@ SHOW_CURSOR = '\033[?25h'
 HIDE_CURSOR = '\033[?25l'
 UNDERLINE_ON = '\033[4m'
 UNDERLINE_OFF = '\033[24m'
-
-
-def sigint_handler(sig, frame):
-    print('%s' % SHOW_CURSOR)
-    sys.exit(0)
 
 
 def on_context_change(context):
@@ -58,37 +52,34 @@ def get_context(app):
         result = applescript.tell.app("iTerm2", "return tty of current session of current tab of front window")
         tty = basename(result.out)
         cmd = ["ps", "-t", tty, "-opid=,stat=,command="]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        out, err = proc.communicate()
+        out = subprocess.run(cmd, capture_output=True, universal_newlines=True, check=True).stdout
         context = "🤷🏻‍♂️"
-        if proc.returncode == 0:
-            process_lines = out.split("\n")
-            # S+ or R+
-            # TODO parse the process line, then check for the flag
-            processes = [p for p in process_lines if "S+" in p]
-            if len(processes) == 0:
-                processes = [p for p in process_lines if "R+" in p]
+        process_lines = out.split("\n")
+        # S+ or R+
+        # TODO parse the process line, then check for the flag
+        processes = [p for p in process_lines if "S+" in p]
+        if not processes:
+            processes = [p for p in process_lines if "R+" in p]
 
-            if len(processes) == 1:
-                match = re.search(r'(?P<pid>\d+)\s+(?P<status>[\w+]+)\s+(?P<cmd>.*)', processes[0])
-                if match is None:
-                    print(f"Could not parse process string: {processes[0]}")
-                else:
-                    if re.search(r'python hotkeys.py', match['cmd']) is not None:
-                        context = 'hotkeys'
-                    else:
-                        lsof_cmd = ["lsof", "-a", "-p", match['pid'], "-d", "cwd", "-F", "n"]
-                        proc = subprocess.Popen(lsof_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                        out, err = proc.communicate()
-                        try:
-                            cwd = [c for c in out.split("\n") if re.match(r'^n', c)][0][1:]
-                        except IndexError:
-                            print(f"Could not find cwd from {out}")
-
-                        cmd = match['cmd'].split()[0]
-                        context = basename(cmd)
+        if len(processes) == 1:
+            match = re.search(r'(?P<pid>\d+)\s+(?P<status>[\w+]+)\s+(?P<cmd>.*)', processes[0])
+            if match is None:
+                print(f"Could not parse process string: {processes[0]}")
             else:
-                print(f"Found an unexpected number of processes {processes}")
+                if re.search(r'python hotkeys.py', match['cmd']) is not None:
+                    context = 'hotkeys'
+                else:
+                    lsof_cmd = ["lsof", "-a", "-p", match['pid'], "-d", "cwd", "-F", "n"]
+                    out = subprocess.run(lsof_cmd, capture_output=True, universal_newlines=True, check=True).stdout
+                    try:
+                        cwd = [c for c in out.split("\n") if c.startswith("n")][0][1:]
+                    except IndexError:
+                        print(f"Could not find cwd from {out}")
+
+                    cmd = match['cmd'].split()[0]
+                    context = basename(cmd)
+        else:
+            print(f"Found an unexpected number of processes {processes}")
 
     return {
             'id': context,
@@ -97,17 +88,23 @@ def get_context(app):
             'cwd': cwd
             }
 
+def main_loop():
+    print(f'{HIDE_CURSOR}')
+    # TODO better handle context change
+    last_active_id = None
+    last_cwd = ''
+    while True:
+        try:
+            active_app = NSWorkspace.sharedWorkspace().activeApplication()
+            context = get_context(active_app)
+            if context['id'] != 'hotkeys' and (context['id'] != last_active_id or context['cwd'] != last_cwd):
+                last_active_id = context['id']
+                last_cwd = context['cwd']
+                on_context_change(context)
+            sleep(1)
+        except KeyboardInterrupt:
+            print(f'{SHOW_CURSOR}')
+            sys.exit(0)
 
-signal.signal(signal.SIGINT, sigint_handler)
-print(f'{HIDE_CURSOR}')
-# TODO better handle context change
-last_active_id = None
-last_cwd = ''
-while True:
-    active_app = NSWorkspace.sharedWorkspace().activeApplication()
-    context = get_context(active_app)
-    if context['id'] != 'hotkeys' and (context['id'] != last_active_id or context['cwd'] != last_cwd):
-        last_active_id = context['id']
-        last_cwd = context['cwd']
-        on_context_change(context)
-    sleep(1)
+
+main_loop()
