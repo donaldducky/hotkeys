@@ -88,6 +88,7 @@ def get_context(app):
             'cwd': cwd
             }
 
+
 def main_loop():
     print(f'{HIDE_CURSOR}')
     # TODO better handle context change
