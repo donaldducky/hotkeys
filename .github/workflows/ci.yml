@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.9]
-        os: [ubuntu-18.04, macOS-latest]
+        os: [macOS-latest]
 
     steps:
     - uses: actions/checkout@v2
