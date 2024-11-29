@@ -1,0 +1,18 @@
+hotkeys:
+  rows:
+    gu: unselect all rows
+    g+: invert selection
+    "|, regex": select rows in column matching regex
+    '"': new sheet with selected rows
+    z|: select rows by expression (ie. MyColumn == 27)
+  columns:
+    g_: resize all columns
+    c, regex: select column by regex
+    "!": toggle "key" column
+  frequences:
+    f: frequencies
+    gF: multi-column frequencies
+    +: add aggregator (used with frequencies)
+  json:
+    gz(, 0: flatten json
+    =json.loads(col): convert json string to json

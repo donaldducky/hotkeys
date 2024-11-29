@@ -77,6 +77,12 @@ def get_context(app):
                         print(f"Could not find cwd from {out}")
 
                     cmd = match['cmd'].split()[0]
+                    parts = re.split(r'\s+', match['cmd'])
+                    if len(parts) > 1 and re.search(r'python([0-9.]+)?$', parts[0]):
+                        cmd = parts[1]
+                    else:
+                        cmd = parts[0]
+
                     context = basename(cmd)
         else:
             print(f"Found an unexpected number of processes {processes}")
