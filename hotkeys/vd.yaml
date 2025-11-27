@@ -9,8 +9,8 @@ hotkeys:
     g_: resize all columns
     c, regex: select column by regex
     "!": toggle "key" column
-  frequences:
-    f: frequencies
+  frequencies:
+    F: frequencies
     gF: multi-column frequencies
     +: add aggregator (used with frequencies)
   json:
